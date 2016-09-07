@@ -4,6 +4,7 @@ DIRECTORY="/etc/nginx/sites-available/
 /etc/nginx/sites-enabled/
 /etc/mysql/conf.d/"
 
+PHP_DIR="/vagrant/php/*"
 NGINX_DIR="/vagrant/nginx/*"
 MYSQL_DIR="/vagrant/mysql/*"
 
@@ -12,7 +13,7 @@ REMOVE_FILES="/etc/nginx/site-enabled/default
 /etc/nginx/conf.d/example_ssl.conf"
 
 echo "Creating directory";
-for d in $DIRECTORY
+for d in ${DIRECTORY}
 do
     if [ ! -d "$d" ]; then
         echo "Processing $d directory..."
@@ -21,7 +22,7 @@ do
 done
 
 echo "Remove files";
-for f in $REMOVE_FILES
+for f in ${REMOVE_FILES}
 do
     if [ -e "$f" ]; then
         echo "Processing $f file..."
@@ -29,13 +30,31 @@ do
     fi
 done
 
+# Php config
+echo "Config php";
+
+echo "Copy files";
+for f in ${PHP_DIR}
+do
+  echo "Processing $f file..."
+  cp ${f} /etc/php56/
+done
+
+if ! php -v | grep "PHP 5.6"; then
+    echo "Change php to 5.6";
+    newphp 56
+fi
+
+echo "Restart service";
+service php-fpm restart > /dev/null
+
 # Nginx config
 echo "Config nginx";
 
 echo "include /etc/nginx/sites-enabled/*;" > /etc/nginx/conf.d/sites.conf;
 
 echo "Copy files";
-for f in $NGINX_DIR
+for f in ${NGINX_DIR}
 do
   echo "Processing $f file..."
   cp ${f} /etc/nginx/sites-available/
@@ -54,14 +73,12 @@ if ! grep "fastcgi_param PATH_INFO \$fastcgi_script_name;" /etc/nginx/fastcgi_pa
     echo -e "\nfastcgi_param PATH_INFO \$fastcgi_script_name;\n" >> /etc/nginx/fastcgi_params
 fi
 
-
-
 echo "Restart service";
 service nginx restart > /dev/null
 
 # Mysql config
 echo "Config mysql";
-for f in $MYSQL_DIR
+for f in ${MYSQL_DIR}
 do
   echo "Processing $f file..."
   cp ${f} /etc/mysql/conf.d/
