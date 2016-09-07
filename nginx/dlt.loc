@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    server_name dlt.loc www.dlt.loc;
+
+    access_log /var/log/nginx/dlt.loc.access.log;
+    error_log /var/log/nginx/dlt.loc.error.log;
+
+    index index.php;
+
+    error_page 500 502 503 504 /500.html;
+    error_page 404 = /404.php;
+
+    root $root_path;
+    set $root_path /var/www/dlt.loc/htdocs/ru;
+    set $php_sock unix:/var/run/php-fpm.sock;
+
+    location /api/ {
+        include fastcgi_params;
+        fastcgi_pass $php_sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
+    }
+
+    location ~ \.php$ {
+        try_files       $uri @bitrix;
+        fastcgi_pass    $php_sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location @bitrix {
+        fastcgi_pass    $php_sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/bitrix/urlrewrite.php;
+    }
+
+    location ~* /bitrix/admin.+\.php$ {
+        try_files       $uri @bitrixadm;
+        fastcgi_pass    $php_sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location @bitrixadm{
+        fastcgi_pass    $php_sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/bitrix/admin/404.php;
+    }
+}

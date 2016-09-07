@@ -1,0 +1,24 @@
+---
+ip: "192.168.2.8"
+memory: 1024
+cpus: 2
+http_port: 8181
+https_port: 44344
+mysql_port: 33306
+
+authorize:
+    - ~/.ssh/id_rsa.pub
+    - ~/.ssh/id_dsa.pub
+
+keys:
+    - ~/.ssh/id_rsa
+    - ~/.ssh/id_dsa
+
+networking:
+    - public: true
+
+folders:
+    - map: ./htdocs
+      to: /var/www/dlt.loc/htdocs
+      owner: www-data
+      group: www-data
