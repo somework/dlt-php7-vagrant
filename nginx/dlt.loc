@@ -14,10 +14,10 @@ server {
     set $root_path /var/www/dlt.loc/htdocs/ru;
     set $php_sock unix:/var/run/php-fpm.sock;
 
-    location /api/ {
+    location /ajax/ {
         include fastcgi_params;
         fastcgi_pass $php_sock;
-        fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/ajax/index.php;
     }
 
     location ~ \.php$ {
