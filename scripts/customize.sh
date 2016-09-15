@@ -12,6 +12,10 @@ REMOVE_FILES="/etc/nginx/site-enabled/default
 /etc/nginx/conf.d/default.conf
 /etc/nginx/conf.d/example_ssl.conf"
 
+echo "Config localtime"
+cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+date
+
 echo "Creating directory";
 for d in ${DIRECTORY}
 do
@@ -83,6 +87,11 @@ do
   echo "Processing $f file..."
   cp ${f} /etc/mysql/conf.d/
 done
+
+if grep "NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES" /etc/mysql/my.cnf; then
+    echo 'set sql_mode empty';
+    sed -i 's/NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES//g' /etc/mysql/my.cnf
+fi
 
 echo "Restart service";
 service mysql restart > /dev/null
